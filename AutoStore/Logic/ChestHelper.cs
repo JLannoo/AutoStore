@@ -20,9 +20,6 @@ public static class ChestHelper {
             var chestPosition = chest.TileLocation;
             var dist = Utility.distance(chestPosition.X, playerPosition.X, chestPosition.Y, playerPosition.Y);
 
-            ModEntry.monitor.Log($"Player position: {playerPosition.X} {playerPosition.Y}");
-            ModEntry.monitor.Log($"Distance to chest in {chestPosition.X} {chestPosition.Y}: {dist}");
-
             if(dist <= distance) {
                 nearby.Add(chest as Chest);
             }

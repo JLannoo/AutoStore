@@ -11,6 +11,8 @@ internal class ModEntry : Mod {
     public static IMonitor monitor;
     private static IModHelper _helper;
 
+    public static ModConfig config;
+
     private AutoStackButton? _stackButton;
     /// <summary>
     /// I assign `mousePosition` in the RenderActiveMenu event because it it's an incorrect value in the ButtonPressed event.
@@ -21,20 +23,22 @@ internal class ModEntry : Mod {
         monitor = Monitor;
         _helper = helper;
 
+        config = helper.ReadConfig<ModConfig>();
+
         helper.Events.Display.MenuChanged += OnChangeMenu;
         helper.Events.Display.RenderedActiveMenu += OnRenderedActiveMenu;
-        helper.Events.Input.ButtonReleased += OnButtonPressed;
+        helper.Events.Input.ButtonPressed += OnButtonPressed;
     }
 
-    private void OnButtonPressed(object? sender, StardewModdingAPI.Events.ButtonReleasedEventArgs e) {
-        if (Game1.activeClickableMenu is GameMenu menu && menu.GetCurrentPage() is InventoryPage page) {
+    private void OnButtonPressed(object? sender, StardewModdingAPI.Events.ButtonPressedEventArgs e) {
+        if (Game1.activeClickableMenu is GameMenu menu && menu.GetCurrentPage() is InventoryPage) {
             if (e.Button.IsUseToolButton()) {
                 _stackButton?.ReceiveLeftClick(_mousePosition.X, _mousePosition.Y);
             }
         }
 
-        if(e.Button == SButton.Q) {
-            ChestHelper.FillOutNearbyChests(10);
+        if (config.Keybind.JustPressed()) {
+            ChestHelper.FillOutNearbyChests(config.DistanceThreshold);
         }
     }
 

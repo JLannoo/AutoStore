@@ -24,7 +24,7 @@ public class AutoStackButton : ClickableTextureComponent {
 
     public void ReceiveLeftClick(int x, int y) {
         if (containsPoint(x, y)) {
-            ChestHelper.FillOutNearbyChests(10);
+            ChestHelper.FillOutNearbyChests(ModEntry.config.DistanceThreshold);
         }
     }
 }
