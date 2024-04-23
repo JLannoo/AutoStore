@@ -5,5 +5,5 @@
   "Description": "It automatically stacks inventory items in nearby chests.",
   "UniqueID": "JLannoo.AutoStore",
   "EntryDll": "AutoStore.dll",
-  "UpdateKeys": []
+  "UpdateKeys": ["Github:JLannoo/AutoStore"]
 }
