@@ -30,8 +30,8 @@ public static class ChestHelper {
 
     public static void FillOutNearbyChests(int distance) {
         var nearbyChest = GetNearbyChests(distance);
-        foreach (var chest in nearbyChest) {
 
+        foreach (var chest in nearbyChest) {
             var tempMenu = new ItemGrabMenu(chest.Items);
 
             // Count items in inventory
@@ -42,6 +42,7 @@ public static class ChestHelper {
             // Shake chest if any item has been transferred
             if (itemsBeforeFill > itemsAfterFill) {
                 chest.shakeTimer = 500;
+                Game1.playSound("Ship");
             }
         }
     }
