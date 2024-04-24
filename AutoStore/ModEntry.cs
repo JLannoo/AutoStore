@@ -33,41 +33,9 @@ internal class ModEntry : Mod {
         helper.Events.GameLoop.GameLaunched += OnGameLaunched;
     }
 
+    #region Events
     private void OnGameLaunched(object sender, GameLaunchedEventArgs e) {
-        // get Generic Mod Config Menu's API (if it's installed)
-        var configMenu = _helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
-        if (configMenu is null)
-            return;
-
-        // register mod
-        configMenu.Register(
-            mod: ModManifest,
-            reset: () => config = new ModConfig(),
-            save: () => _helper.WriteConfig(config)
-        );
-
-        configMenu.AddSectionTitle(
-            mod: ModManifest,
-            text: () => "AutoStore"
-        );
-
-        configMenu.AddNumberOption(
-            mod: ModManifest,
-            name: () => "Chest detection distance",
-            tooltip: () => "How far away the mod will look for chests to stack to.",
-            getValue: () => config.DistanceThreshold,
-            setValue: value => config.DistanceThreshold = (int)value,
-            min: 1,
-            max: 100
-        );
-
-        configMenu.AddKeybindList(
-            mod: ModManifest,
-            name: () => "Auto stack keybinds",
-            tooltip: () => "Which keys you can press to execute the auto stack function",
-            getValue: () => config.Keybind,
-            setValue: value => config.Keybind = value
-        );
+        RegisterConfigMenu();
     }
 
     private void OnButtonPressed(object? sender, StardewModdingAPI.Events.ButtonPressedEventArgs e) {
@@ -101,4 +69,44 @@ internal class ModEntry : Mod {
             _stackButton = null;
         }
     }
+    #endregion
+
+    #region Methods
+    private void RegisterConfigMenu() {
+        // get Generic Mod Config Menu's API (if it's installed)
+        var configMenu = _helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
+        if (configMenu is null)
+            return;
+
+        // register mod
+        configMenu.Register(
+            mod: ModManifest,
+            reset: () => config = new ModConfig(),
+            save: () => _helper.WriteConfig(config)
+        );
+
+        configMenu.AddSectionTitle(
+            mod: ModManifest,
+            text: () => "AutoStore"
+        );
+
+        configMenu.AddNumberOption(
+            mod: ModManifest,
+            name: () => "Chest detection distance",
+            tooltip: () => "How far away the mod will look for chests to stack to.",
+            getValue: () => config.DistanceThreshold,
+            setValue: value => config.DistanceThreshold = value,
+            min: 1,
+            max: 100
+        );
+
+        configMenu.AddKeybindList(
+            mod: ModManifest,
+            name: () => "Auto stack keybinds",
+            tooltip: () => "Which keys you can press to execute the auto stack function",
+            getValue: () => config.Keybind,
+            setValue: value => config.Keybind = value
+        );
+    }
+    #endregion
 }
