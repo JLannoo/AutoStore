@@ -1,7 +1,7 @@
 {
   "Name": "AutoStore",
   "Author": "JLannoo",
-  "Version": "1.0.0-beta.2",
+  "Version": "1.0.0-beta.3",
   "Description": "It automatically stacks inventory items in nearby chests.",
   "UniqueID": "JLannoo.AutoStore",
   "EntryDll": "AutoStore.dll",
