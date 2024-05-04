@@ -23,7 +23,7 @@ public class AutoStackButton : ClickableTextureComponent {
 
     public void ReceiveLeftClick(int x, int y) {
         if (active && containsPoint(x, y)) {
-            ChestHelper.FillOutNearbyChests(ModEntry.config.DistanceThreshold);
+            ChestHelper.TryStackToNearbyChests(ModEntry.config.DistanceThreshold);
         }
     }
 
@@ -31,6 +31,8 @@ public class AutoStackButton : ClickableTextureComponent {
         active = ChestHelper.GetNearbyChests(ModEntry.config.DistanceThreshold).Count > 0;
 
         float opacity = active ? 1 : 0.5f;
-        base.draw(b, Color.White * opacity, 1);
+        base.draw(b, Color.White * opacity, 2);
+
+        Game1.activeClickableMenu.drawMouse(b);
     }
 }

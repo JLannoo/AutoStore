@@ -20,6 +20,10 @@ internal class ModEntry : Mod {
     /// I assign `mousePosition` in the RenderActiveMenu event because it it's an incorrect value in the ButtonPressed event.
     /// </summary>
     private Point _mousePosition;
+    /// <summary>
+    /// I assign `hoveredItem` in the RenderingHud event because it's set to null for Toolbar in other events
+    /// </summary>
+    private Item? _hoveredItem;
 
     public override void Entry(IModHelper helper){
         monitor = Monitor;
@@ -28,35 +32,51 @@ internal class ModEntry : Mod {
         config = helper.ReadConfig<ModConfig>();
 
         helper.Events.Display.MenuChanged += OnChangeMenu;
-        helper.Events.Display.RenderedActiveMenu += OnRenderedActiveMenu;
         helper.Events.Input.ButtonPressed += OnButtonPressed;
         helper.Events.GameLoop.GameLaunched += OnGameLaunched;
+
+        helper.Events.Display.RenderedActiveMenu += OnRenderedActiveMenu;
+        helper.Events.Display.RenderingHud += OnRenderingHud;
     }
 
     #region Events
+    private void OnRenderingHud(object? sender, RenderingHudEventArgs e) {
+        _hoveredItem = ItemHelper.GetHoveredItem();
+    }
+
     private void OnGameLaunched(object sender, GameLaunchedEventArgs e) {
         RegisterConfigMenu();
     }
 
-    private void OnButtonPressed(object? sender, StardewModdingAPI.Events.ButtonPressedEventArgs e) {
+    private void OnButtonPressed(object? sender, ButtonPressedEventArgs e) {
         if (Game1.activeClickableMenu is GameMenu menu && menu.GetCurrentPage() is InventoryPage) {
             if (e.Button.IsUseToolButton()) {
                 _stackButton?.ReceiveLeftClick(_mousePosition.X, _mousePosition.Y);
             }
         }
 
-        if (config.Keybind.JustPressed()) {
-            ChestHelper.FillOutNearbyChests(config.DistanceThreshold);
+        if(Context.IsWorldReady) {
+            if (config.FetchKeybind.JustPressed()) {
+                ChestHelper.TryFetchFromNearbyChests(config.DistanceThreshold, _hoveredItem);
+                return;
+            }
+
+            if (config.StackKeybind.JustPressed()) {
+                ChestHelper.TryStackToNearbyChests(config.DistanceThreshold, _hoveredItem);
+                return;
+            }
         }
     }
 
-    private void OnRenderedActiveMenu(object? sender, StardewModdingAPI.Events.RenderedActiveMenuEventArgs e) {
-        _mousePosition = Game1.getMousePosition();
-        _stackButton?.draw(Game1.spriteBatch);
-        _stackButton?.tryHover(_mousePosition.X, _mousePosition.Y);
+    private void OnRenderedActiveMenu(object? sender, RenderedActiveMenuEventArgs e) {
+        if(Game1.activeClickableMenu is GameMenu menu && menu.GetCurrentPage() is InventoryPage page) {
+            _mousePosition = Game1.getMousePosition();
+            _stackButton?.draw(e.SpriteBatch);
+            _stackButton?.tryHover(_mousePosition.X, _mousePosition.Y);
+        }
     }
 
-    private void OnChangeMenu(object? sender, StardewModdingAPI.Events.MenuChangedEventArgs e) {
+    private void OnChangeMenu(object? sender, MenuChangedEventArgs e) {
         if(Game1.activeClickableMenu is GameMenu menu && menu.GetCurrentPage() is InventoryPage page) {
             var orgButton = page.organizeButton;
             var orgPosition = page.organizeButton.bounds.Location;
@@ -103,9 +123,17 @@ internal class ModEntry : Mod {
         configMenu.AddKeybindList(
             mod: ModManifest,
             name: () => "Auto stack keybinds",
-            tooltip: () => "Which keys you can press to execute the auto stack function",
-            getValue: () => config.Keybind,
-            setValue: value => config.Keybind = value
+            tooltip: () => "Press to auto stack items to nearby chests",
+            getValue: () => config.StackKeybind,
+            setValue: value => config.StackKeybind = value
+        );
+
+        configMenu.AddKeybindList(
+            mod: ModManifest,
+            name: () => "Auto fetch keybinds",
+            tooltip: () => "Press to pull the hovered item from nearby chests",
+            getValue: () => config.FetchKeybind,
+            setValue: value => config.FetchKeybind = value
         );
     }
     #endregion
